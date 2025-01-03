@@ -7,16 +7,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Ensure /tmp is writable
 RUN chmod 1777 /tmp
 
-# Alternatively, set TMPDIR to /var/tmp
-# RUN mkdir -p /var/tmp && chmod 1777 /var/tmp
-# ENV TMPDIR=/var/tmp
-
 # Update package lists and install necessary packages
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         util-linux \
         procps \
-        bash && \
+        bash \
+        fuse3 \
+        fuse-overlayfs \
+        && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the setup script into the container
