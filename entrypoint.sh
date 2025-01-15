@@ -84,16 +84,16 @@ mount --bind /lib64 /docker-overlay/lower/lib64
 mount --bind /usr/lib/x86_64-linux-gnu /docker-overlay/lower/usr/lib/x86_64-linux-gnu
 mount --bind /lib/x86_64-linux-gnu /docker-overlay/lower/lib/x86_64-linux-gnu
 
-# Mount OverlayFS for /home directory
-if ! fuse-overlayfs -o lowerdir=/docker-overlay/lower/home/$USERNAME,upperdir=/docker-overlay/upper/home/$USERNAME,workdir=/docker-overlay/work/home/$USERNAME /home/$USERNAME; then
-    echo "Error: Failed to mount fuse-overlayfs for /home/$USERNAME directory"
-    echo "Debug info:"
-    ls -la /docker-overlay/
-    ls -la $(which fuse-overlayfs)
-    id
-    mount
-    exit 1
-fi
+# # Mount OverlayFS for /home directory
+# if ! fuse-overlayfs -o lowerdir=/docker-overlay/lower/home/$USERNAME,upperdir=/docker-overlay/upper/home/$USERNAME,workdir=/docker-overlay/work/home/$USERNAME /home/$USERNAME; then
+#     echo "Error: Failed to mount fuse-overlayfs for /home/$USERNAME directory"
+#     echo "Debug info:"
+#     ls -la /docker-overlay/
+#     ls -la $(which fuse-overlayfs)
+#     id
+#     mount
+#     exit 1
+# fi
 
 # Handle dependencies for the command
 binary=$(command -v "$1")
