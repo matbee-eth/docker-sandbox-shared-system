@@ -1,5 +1,4 @@
 #!/bin/bash
-which fuse-overlayfs
 set -e
 
 DEBUG=${DEBUG:-false}
@@ -84,7 +83,8 @@ mount --bind /lib64 /docker-overlay/lower/lib64
 mount --bind /usr/lib/x86_64-linux-gnu /docker-overlay/lower/usr/lib/x86_64-linux-gnu
 mount --bind /lib/x86_64-linux-gnu /docker-overlay/lower/lib/x86_64-linux-gnu
 
-# # Mount OverlayFS for /home directory
+# Mount OverlayFS for /home directory
+# Docker supports OverlayFS natively
 # if ! fuse-overlayfs -o lowerdir=/docker-overlay/lower/home/$USERNAME,upperdir=/docker-overlay/upper/home/$USERNAME,workdir=/docker-overlay/work/home/$USERNAME /home/$USERNAME; then
 #     echo "Error: Failed to mount fuse-overlayfs for /home/$USERNAME directory"
 #     echo "Debug info:"

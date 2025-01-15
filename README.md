@@ -1,78 +1,86 @@
 # Nested Docker Sandboxing
 
-A secure containerization solution that provides an additional layer of isolation through nested Docker containers with OverlayFS support. This solution is specifically designed for Ubuntu host systems, ensuring that the container environment matches the host setup to avoid environment reproduction issues.
+A secure containerization solution that provides an additional layer of isolation through Docker containers with OverlayFS support. This solution maintains host system binary and library compatibility while providing a secure, isolated execution environment.
 
 ## Overview
 
-This project implements a parent container that can safely run Docker containers with enhanced isolation. It uses OverlayFS to provide a read-only lower filesystem layer while maintaining a writable upper layer, ensuring that host system binaries and libraries are accessible but protected. By matching the container environment with the host system, it eliminates the need to reproduce complex environments within containers.
+This project implements a containerized environment that can safely run commands with enhanced isolation. It uses OverlayFS to provide a read-only lower filesystem layer containing system binaries and libraries, while maintaining a writable upper layer for runtime modifications. The system ensures host compatibility by properly mapping user permissions and maintaining access to necessary system resources.
 
 ## Features
 
-- Secure nested Docker container execution
+- Secure container execution with user permission mapping
 - OverlayFS-based filesystem isolation
-- Automatic library dependency handling
-- Read-only mounting of system binaries and libraries
-- Dynamic binary dependency resolution
-- Cleanup on container exit
+- Automatic system binary and library mounting
+- Dynamic library dependency resolution
+- File creation monitoring and dependency handling
+- Proper user and group ID mapping from host
+- Automatic cleanup on container exit
 
 ## Prerequisites
 
 - Docker installed on the host system
-- Ubuntu 22.04 or later
-- Sufficient permissions to run privileged containers
-
-## Building
-
-Build the parent container image:
-
-```bash
-docker build -t parent-container:latest .
-```
+- `fuse-overlayfs` support
+- Sufficient permissions to run containers with SYS_ADMIN capability
 
 ## Usage
 
-Use the `start_parent_container.sh` script to run commands within the parent container:
+Use the `run_sandboxed_command.sh` script to execute commands within the sandboxed environment:
 
 ```bash
-./start_parent_container.sh [command] [arguments]
+./run_sandboxed_command.sh [command] [arguments]
 ```
 
 The script automatically:
+- Maps the current user's home directory
+- Sets up proper user/group permissions
 - Mounts necessary system directories
-- Handles file dependencies
-- Sets up the proper environment for nested container execution
+- Handles library dependencies
 
 ### Example
 
 ```bash
-./start_parent_container.sh docker run -it ubuntu:latest bash
+./run_sandboxed_command.sh ls -la
 ```
 
 ## How it Works
 
-1. The parent container is initialized with necessary system mounts and privileges
-2. OverlayFS is used to create isolated filesystem layers:
-   - Lower layer: Read-only system binaries and libraries
-   - Upper layer: Writable container space
-3. Binary dependencies are automatically resolved and mounted
-4. File system events are monitored for proper cleanup
-5. Cleanup is performed on container exit
+1. The container environment is initialized with:
+   - Current user's UID/GID mapping
+   - Read-only mount of user's home directory
+   - SYS_ADMIN capability for OverlayFS operations
+
+2. The entrypoint script:
+   - Sets up OverlayFS directory structure
+   - Mounts system directories (usr/bin, lib, etc.)
+   - Monitors file creation for dynamic dependency handling
+   - Manages library dependencies through symlinks
+   - Performs cleanup on exit
 
 ## Directory Structure
 
 ```
 /docker-overlay/
 ├── lower/          # Read-only system binaries and libraries
-├── upper/          # Writable layer
-├── work/           # OverlayFS work directory
-└── merged/         # Final merged view
-
-/sandbox-output/    # Output directory for sandbox operations
+│   ├── home/      # Read-only user home directory
+│   ├── usr/bin    # System binaries
+│   ├── usr/lib    # System libraries
+│   └── lib        # Additional libraries
+├── upper/         # Writable layer
+├── work/          # OverlayFS work directory
+└── merged/        # Final merged view
 ```
 
 ## Security Considerations
 
-- The parent container runs with privileged access
-- Host system binaries are mounted read-only
-- Automatic cleanup of container resources
-- Isolated network namespace
+- Container runs with minimal required capabilities (SYS_ADMIN for OverlayFS)
+- Host system files are mounted read-only
+- User home directory is mounted read-only
+- Automatic cleanup of resources on exit
+- Proper user permission mapping
+
+## Environment Variables
+
+- `DEBUG`: Enable debug logging when set to true
+- `CONTAINER_USER`: Username for the container (defaults to current user)
+- `CONTAINER_UID`: User ID for the container (defaults to current UID)
+- `CONTAINER_GID`: Group ID for the container (defaults to current GID)

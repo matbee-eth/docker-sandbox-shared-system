@@ -23,10 +23,8 @@ RUN apt-get update && \
         libblas3 \
         liblapack3 \
         fuse3 \
-        fuse-overlayfs \
         && rm -rf /var/lib/apt/lists/*
 
-RUN fuse-overlayfs --version
 RUN groupadd -g 999 docker || true && \
     usermod -aG docker root
 
