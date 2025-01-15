@@ -7,6 +7,12 @@ mkdir -p /lower /upper /work /merged
 # Mount the host directory to /lower
 mount --bind /test-data /lower
 
+# Mount OverlayFS with error handling
+if ! fuse-overlayfs -o lowerdir=/lower,upperdir=/upper,workdir=/work /merged; then
+    echo "Error: Failed to mount fuse-overlayfs. Ensure you have the necessary permissions and fuse-overlayfs installed."
+    exit 1
+fi
+
 echo "OverlayFS mounted successfully."
 echo "Initial merged directory content:"
 ls -la /merged

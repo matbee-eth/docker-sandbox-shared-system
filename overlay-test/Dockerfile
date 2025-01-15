@@ -14,6 +14,7 @@ RUN apt-get update && \
         procps \
         bash \
         fuse3 \
+        fuse-overlayfs \
         && \
     rm -rf /var/lib/apt/lists/*
 
